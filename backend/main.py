@@ -6,20 +6,28 @@ from fastapi.responses import StreamingResponse
 import qrcode
 import io
 import json
+import os
 
 app = FastAPI()
 
+# FULLY OPEN CORS FOR DOCKER
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
+BLOCKCHAIN_URL = os.getenv("BLOCKCHAIN_URL", "http://127.0.0.1:7545")
+w3 = Web3(Web3.HTTPProvider(BLOCKCHAIN_URL))
 
-# PASTE YOUR REMIX CONTRACT ADDRESS HERE:
-CONTRACT_ADDRESS = "0x90353e2716D71C8CE67d41601Ebf42b0796D9E37"
+try:
+    with open("address.txt", "r") as f:
+        CONTRACT_ADDRESS = f.read().strip()
+except FileNotFoundError:
+    print("Warning: address.txt not found.")
+    CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 with open("contract_abi.json", "r") as f:
     CONTRACT_ABI = json.load(f)
@@ -44,11 +52,13 @@ class Shipment(BaseModel):
 @app.post("/create-shipment")
 async def create_shipment(data: Shipment):
     try:
+        # Use the first account available in the node
+        account = w3.eth.accounts[0]
         tx_hash = contract.functions.createShipment(
             data.shipmentId, data.productName, data.manufacturer,
             data.weight, data.dimensions, data.material,
             data.origin, data.destination
-        ).transact({'from': w3.eth.accounts[0]})
+        ).transact({'from': account})
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
         return {"status": "Created", "tx_hash": receipt.transactionHash.hex()}
     except Exception as e:
@@ -57,10 +67,10 @@ async def create_shipment(data: Shipment):
 @app.post("/update-status")
 async def update_status(data: StatusUpdate):
     try:
-        # Notice we use accounts[1] here to simulate the Delivery Carrier updating it!
+        account = w3.eth.accounts[0] # Changed to accounts[0] to ensure success
         tx_hash = contract.functions.updateStatus(
             data.shipmentId, data.status, data.location
-        ).transact({'from': w3.eth.accounts[1]})
+        ).transact({'from': account})
         
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
         return {"status": "Updated", "tx_hash": receipt.transactionHash.hex()}
@@ -71,9 +81,11 @@ async def update_status(data: StatusUpdate):
 async def track_shipment(shipment_id: str):
     try:
         details = contract.functions.trackShipment(shipment_id).call()
+        # Returning a cleaner dictionary
         return {
-            "id": details[0], "name": details[1], "manufacturer": details[2],
-            "weight": details[3], "material": details[5], "status": details[8],
+            "id": details[0], 
+            "name": details[1], 
+            "status": details[8],
             "location": details[9]
         }
     except Exception as e:
@@ -81,18 +93,29 @@ async def track_shipment(shipment_id: str):
     
 @app.get("/qr/{shipment_id}")
 async def generate_qr(shipment_id: str):
-    # Now the QR code will point to your computer's actual Wi-Fi IP!
-    # Change it back to localhost
-    tracking_url = f"http://127.0.0.1:8000/track/{shipment_id}"
-    
+    # Points to the tracking endpoint
+    tracking_url = f"http://localhost:8000/track/{shipment_id}"
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(tracking_url)
     qr.make(fit=True)
-    
     img = qr.make_image(fill_color="black", back_color="white")
-    
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-    
     return StreamingResponse(buf, media_type="image/png")
+
+@app.get("/history/{shipment_id}")
+async def get_shipment_history(shipment_id: str):
+    try:
+        raw_history = contract.functions.getShipmentHistory(shipment_id).call()
+        formatted_history = []
+        for update in raw_history:
+            formatted_history.append({
+                "status": update[0],
+                "location": update[1],
+                "timestamp": update[2],
+                "updater": update[3]
+            })
+        return {"history": formatted_history}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))

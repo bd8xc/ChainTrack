@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  blockchain:
+    image: trufflesuite/ganache-cli:latest
+    ports:
+      - "7545:8545"
+    # This ensures we get the exact same 10 test accounts every time
+    command:
+      [
+        "-d",
+        "-m",
+        "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
+      ]
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      # Tell Python to talk to the 'blockchain' container on its internal port
+      - BLOCKCHAIN_URL=http://blockchain:8545
+    depends_on:
+      - blockchain
+    volumes:
+      - ./backend:/app
+    # THIS IS THE MAGIC LINE: Deploy the contract -> then start the server
+    # Added 'sleep 10' to give Ganache plenty of time to boot up
+    command: sh -c "sleep 10 && python deploy.py && uvicorn main:app --host 0.0.0.0 --port 8000"

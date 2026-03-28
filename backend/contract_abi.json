@@ -1,52 +1,46 @@
 [
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
         "internalType": "string",
-        "name": "shipmentId",
-        "type": "string"
-      }
-    ],
-    "name": "ShipmentCreated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "shipmentId",
+        "name": "_shipmentId",
         "type": "string"
       },
       {
-        "indexed": false,
         "internalType": "string",
-        "name": "status",
+        "name": "_productName",
         "type": "string"
       },
       {
-        "indexed": false,
         "internalType": "string",
-        "name": "location",
+        "name": "_manufacturer",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_weight",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_dimensions",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_material",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_origin",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_destination",
         "type": "string"
       }
-    ],
-    "name": "StatusUpdated",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      { "internalType": "string", "name": "_shipmentId", "type": "string" },
-      { "internalType": "string", "name": "_productName", "type": "string" },
-      { "internalType": "string", "name": "_manufacturer", "type": "string" },
-      { "internalType": "uint256", "name": "_weight", "type": "uint256" },
-      { "internalType": "string", "name": "_dimensions", "type": "string" },
-      { "internalType": "string", "name": "_material", "type": "string" },
-      { "internalType": "string", "name": "_origin", "type": "string" },
-      { "internalType": "string", "name": "_destination", "type": "string" }
     ],
     "name": "createShipment",
     "outputs": [],
@@ -54,59 +48,64 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "string", "name": "", "type": "string" }],
-    "name": "shipments",
-    "outputs": [
-      { "internalType": "string", "name": "shipmentId", "type": "string" },
-      { "internalType": "string", "name": "productName", "type": "string" },
-      { "internalType": "string", "name": "manufacturer", "type": "string" },
-      { "internalType": "uint256", "name": "weight", "type": "uint256" },
-      { "internalType": "string", "name": "dimensions", "type": "string" },
+    "inputs": [
       {
         "internalType": "string",
-        "name": "packagingMaterial",
+        "name": "_shipmentId",
         "type": "string"
       },
-      { "internalType": "string", "name": "origin", "type": "string" },
-      { "internalType": "string", "name": "destination", "type": "string" },
-      { "internalType": "string", "name": "status", "type": "string" },
-      { "internalType": "string", "name": "location", "type": "string" },
-      { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+      {
+        "internalType": "string",
+        "name": "_newStatus",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_newLocation",
+        "type": "string"
+      }
     ],
-    "stateMutability": "view",
+    "name": "updateStatus",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "string", "name": "_shipmentId", "type": "string" }
+      {
+        "internalType": "string",
+        "name": "_shipmentId",
+        "type": "string"
+      }
     ],
-    "name": "trackShipment",
+    "name": "getShipmentHistory",
     "outputs": [
       {
         "components": [
-          { "internalType": "string", "name": "shipmentId", "type": "string" },
-          { "internalType": "string", "name": "productName", "type": "string" },
           {
             "internalType": "string",
-            "name": "manufacturer",
+            "name": "status",
             "type": "string"
           },
-          { "internalType": "uint256", "name": "weight", "type": "uint256" },
-          { "internalType": "string", "name": "dimensions", "type": "string" },
           {
             "internalType": "string",
-            "name": "packagingMaterial",
+            "name": "location",
             "type": "string"
           },
-          { "internalType": "string", "name": "origin", "type": "string" },
-          { "internalType": "string", "name": "destination", "type": "string" },
-          { "internalType": "string", "name": "status", "type": "string" },
-          { "internalType": "string", "name": "location", "type": "string" },
-          { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "updater",
+            "type": "address"
+          }
         ],
-        "internalType": "struct ShipmentTracking.Shipment",
+        "internalType": "struct ShipmentTracking.StatusUpdate[]",
         "name": "",
-        "type": "tuple"
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -114,13 +113,66 @@
   },
   {
     "inputs": [
-      { "internalType": "string", "name": "_shipmentId", "type": "string" },
-      { "internalType": "string", "name": "_status", "type": "string" },
-      { "internalType": "string", "name": "_location", "type": "string" }
+      {
+        "internalType": "string",
+        "name": "_shipmentId",
+        "type": "string"
+      }
     ],
-    "name": "updateStatus",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "trackShipment",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

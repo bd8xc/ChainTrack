@@ -1,127 +1,403 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Blockchain Logistics</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChainLogistics | Blockchain Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body {
-        font-family: sans-serif;
-        padding: 20px;
-        line-height: 1.6;
+        background: #020617;
+        color: #f8fafc;
+        font-family: "Plus Jakarta Sans", sans-serif;
       }
-      .card {
-        border: 1px solid #ccc;
-        padding: 15px;
-        border-radius: 8px;
-        max-width: 400px;
-        margin-bottom: 20px;
+      .glass {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
-      input {
-        display: block;
-        margin-bottom: 10px;
-        width: 90%;
-        padding: 8px;
+      .btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        transition: all 0.3s ease;
       }
-      button {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5);
+      }
+      .step-line {
+        height: 2px;
+        flex-grow: 1;
+        background: #334155;
+        position: absolute;
+        top: 10px;
+        z-index: 0;
+      }
+      .step-dot {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #334155;
+        border: 4px solid #020617;
+        transition: all 0.5s ease;
+        z-index: 10;
+      }
+      .active-dot {
+        background: #3b82f6;
+        box-shadow: 0 0 15px #3b82f6;
+      }
+      .active-line {
+        background: #3b82f6;
       }
     </style>
   </head>
-  <body>
-    <h2>📦 Shipment Tracker</h2>
+  <body class="min-h-screen p-4 md:p-12">
+    <div class="max-w-5xl mx-auto">
+      <header class="flex justify-between items-center mb-12">
+        <div>
+          <h1 class="text-3xl font-extrabold text-white tracking-tight">
+            CHAIN<span class="text-blue-500">LOGISTICS</span>
+          </h1>
+          <p class="text-slate-400 text-sm">
+            Decentralized Supply Chain Protocol v1.0
+          </p>
+        </div>
+        <div
+          class="glass px-4 py-2 rounded-full text-xs font-mono text-blue-400 border-blue-500/30"
+        >
+          ● Connected: Ganache Node
+        </div>
+      </header>
 
-    <div class="card">
-      <h3>Create New Shipment</h3>
-      <input id="sId" placeholder="Shipment ID (e.g. SHP001)" />
-      <input id="pName" placeholder="Product Name" />
-      <button onclick="createShipment()">Register on Blockchain</button>
-    </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-5 space-y-6">
+          <div class="glass p-8 rounded-3xl">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+              <span class="bg-blue-500/20 p-2 rounded-lg text-blue-400"
+                >📝</span
+              >
+              Register New Shipment
+            </h2>
+            <div class="space-y-4">
+              <div>
+                <label class="text-xs text-slate-500 ml-1 mb-1 block"
+                  >Shipment Serial ID</label
+                >
+                <input
+                  id="sId"
+                  placeholder="e.g. SHP-772"
+                  class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition"
+                />
+              </div>
+              <div>
+                <label class="text-xs text-slate-500 ml-1 mb-1 block"
+                  >Product Name</label
+                >
+                <input
+                  id="sName"
+                  placeholder="e.g. RTX 4090 GPU"
+                  class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition"
+                />
+              </div>
+              <button
+                onclick="createShipment()"
+                class="btn-primary w-full py-4 rounded-xl font-bold text-white mt-4"
+              >
+                Broadcast to Blockchain
+              </button>
+            </div>
+          </div>
+        </div>
 
-    <div class="card">
-      <h3>Update Logistics Status</h3>
-      <input id="uId" placeholder="Shipment ID (e.g. SHP002)" />
-      <input id="uStatus" placeholder="New Status (e.g. IN_TRANSIT)" />
-      <input id="uLocation" placeholder="New Location (e.g. London Hub)" />
-      <button onclick="updateShipment()" style="background: #28a745">
-        Update Status
-      </button>
-    </div>
+        <div class="lg:col-span-7 space-y-6">
+          <div class="glass p-8 rounded-3xl">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+              <span class="bg-blue-500/20 p-2 rounded-lg text-blue-400"
+                >🔍</span
+              >
+              Live Tracking
+            </h2>
+            <div class="flex gap-3 mb-10">
+              <input
+                id="searchId"
+                placeholder="Enter Shipment ID to scan..."
+                class="flex-1 bg-slate-900/50 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500 transition"
+              />
+              <button
+                onclick="track()"
+                class="bg-slate-100 text-slate-900 px-8 rounded-xl font-bold hover:bg-white transition"
+              >
+                Track
+              </button>
+            </div>
 
-    <div class="card">
-      <h3>Track Shipment</h3>
-      <input id="searchId" placeholder="Enter Shipment ID" />
-      <button onclick="track()">Track Now</button>
-      <div id="result"></div>
-      <div id="result"></div>
-      <div
-        id="qrContainer"
-        style="display: none; margin-top: 15px; text-align: center"
-      >
-        <p style="font-size: 14px; color: #555">Scan to Verify on Blockchain</p>
-        <img
-          id="qrImage"
-          src=""
-          style="
-            width: 150px;
-            border: 1px solid #ccc;
-            padding: 5px;
-            border-radius: 8px;
-          "
-        />
+            <div
+              id="result"
+              class="hidden animate-in fade-in slide-in-from-bottom-4 duration-700"
+            >
+              <div class="relative flex justify-between mb-12 px-2">
+                <div
+                  class="step-line"
+                  id="line1"
+                  style="left: 10%; width: 35%"
+                ></div>
+                <div
+                  class="step-line"
+                  id="line2"
+                  style="left: 55%; width: 35%"
+                ></div>
+
+                <div class="relative z-10 flex flex-col items-center w-24">
+                  <div id="dot1" class="step-dot"></div>
+                  <span
+                    class="text-[10px] mt-2 font-bold text-slate-500 whitespace-nowrap"
+                    >CREATED</span
+                  >
+                </div>
+                <div class="relative z-10 flex flex-col items-center w-24">
+                  <div id="dot2" class="step-dot"></div>
+                  <span
+                    class="text-[10px] mt-2 font-bold text-slate-500 whitespace-nowrap"
+                    >IN TRANSIT</span
+                  >
+                </div>
+                <div class="relative z-10 flex flex-col items-center w-24">
+                  <div id="dot3" class="step-dot"></div>
+                  <span
+                    class="text-[10px] mt-2 font-bold text-slate-500 whitespace-nowrap"
+                    >DELIVERED</span
+                  >
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4 pt-6 border-t border-white/10">
+                <div class="bg-slate-900/40 p-4 rounded-2xl">
+                  <p
+                    class="text-slate-500 text-xs mb-1 uppercase tracking-widest"
+                  >
+                    Current Status
+                  </p>
+                  <p id="displayStatus" class="font-bold text-blue-400 italic">
+                    --
+                  </p>
+                </div>
+                <div class="bg-slate-900/40 p-4 rounded-2xl">
+                  <p
+                    class="text-slate-500 text-xs mb-1 uppercase tracking-widest"
+                  >
+                    Last Location
+                  </p>
+                  <p id="displayLoc" class="font-bold text-white">--</p>
+                </div>
+              </div>
+
+              <div class="mt-8 flex justify-center">
+                <div
+                  class="p-4 bg-white rounded-3xl shadow-2xl shadow-blue-500/20"
+                >
+                  <img id="qrImage" class="w-32 h-32" alt="QR Code" />
+                </div>
+              </div>
+
+              <div
+                class="mt-8 p-6 bg-slate-900/60 rounded-2xl border border-slate-700"
+              >
+                <h3
+                  class="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider flex items-center gap-2"
+                >
+                  <span class="text-blue-500">📍</span> Update Logistics
+                  Location
+                </h3>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                  <input
+                    id="updateLoc"
+                    placeholder="New City (e.g. Dubai)"
+                    class="w-full bg-slate-800 border-none rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 text-white"
+                  />
+                  <select
+                    id="updateStatus"
+                    class="w-full bg-slate-800 border-none rounded-xl p-3 text-sm outline-none text-white focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="IN_TRANSIT">In Transit</option>
+                    <option value="DELIVERED">Delivered</option>
+                  </select>
+                </div>
+                <button
+                  onclick="updateShipment()"
+                  class="w-full bg-slate-700 hover:bg-blue-600 transition py-3 rounded-xl font-bold text-sm text-white"
+                >
+                  Sign & Update Ledger
+                </button>
+              </div>
+
+              <div class="mt-8 p-6 glass rounded-2xl">
+                <h3
+                  class="text-sm font-bold text-slate-300 mb-6 uppercase tracking-wider flex items-center gap-2"
+                >
+                  <span class="text-blue-500">⏳</span> Immutable Audit Trail
+                </h3>
+                <div
+                  id="historyContainer"
+                  class="space-y-4 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-700 before:to-transparent"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
+      const API = "http://127.0.0.1:8000";
+
       async function createShipment() {
         const data = {
           shipmentId: document.getElementById("sId").value,
-          productName: document.getElementById("pName").value,
-          manufacturer: "Global Logistics",
-          weight: 5,
-          dimensions: "12x12x12",
-          material: "Cardboard",
-          origin: "NY",
-          destination: "LA",
+          productName: document.getElementById("sName").value,
+          manufacturer: "Global Hub",
+          weight: 12,
+          dimensions: "30x20x10",
+          material: "Composite",
+          origin: "Mumbai",
+          destination: "London",
         };
-        const response = await fetch("http://127.0.0.1:8000/create-shipment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        const res = await response.json();
-        alert("Success! Hash: " + res.tx_hash);
-      }
+        try {
+          const res = await fetch(`${API}/create-shipment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const result = await res.json();
+          alert(
+            "Immutable Record Created!\nTx: " +
+              result.tx_hash.substring(0, 20) +
+              "...",
+          );
 
-      async function updateShipment() {
-        const data = {
-          shipmentId: document.getElementById("uId").value,
-          status: document.getElementById("uStatus").value,
-          location: document.getElementById("uLocation").value,
-        };
-
-        const response = await fetch("http://127.0.0.1:8000/update-status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        const res = await response.json();
-        alert("Status Updated! Hash: " + res.tx_hash);
+          // Automatically put the ID in the search box so the user can just click Track!
+          document.getElementById("searchId").value = data.shipmentId;
+        } catch (e) {
+          alert("Error connecting to Blockchain Node");
+        }
       }
 
       async function track() {
         const id = document.getElementById("searchId").value;
-        const response = await fetch(`http://127.0.0.1:8000/track/${id}`);
-        const data = await response.json();
-        document.getElementById("result").innerHTML =
-          `<p><strong>Status:</strong> ${data.status}</p><p><strong>Location:</strong> ${data.location}</p>`;
+        if (!id) return;
 
-        // --- ADD THESE TWO LINES ---
-        document.getElementById("qrImage").src =
-          `http://127.0.0.1:8000/qr/${id}`;
-        document.getElementById("qrContainer").style.display = "block";
+        try {
+          // 1. Fetch Basic Tracking Data
+          const res = await fetch(`${API}/track/${id}`);
+          const data = await res.json();
+
+          const status = data.status || "N/A";
+          const location = data.location || "N/A";
+
+          document.getElementById("result").classList.remove("hidden");
+          document.getElementById("displayStatus").innerText = status;
+          document.getElementById("displayLoc").innerText = location;
+          document.getElementById("qrImage").src = `${API}/qr/${id}`;
+
+          // Reset Stepper
+          ["dot1", "dot2", "dot3"].forEach((d) =>
+            document.getElementById(d).classList.remove("active-dot"),
+          );
+          ["line1", "line2"].forEach((l) =>
+            document.getElementById(l).classList.remove("active-line"),
+          );
+
+          // Stepper Logic based on Status
+          document.getElementById("dot1").classList.add("active-dot");
+          const upperStatus = status.toUpperCase();
+
+          if (upperStatus.includes("TRANSIT")) {
+            document.getElementById("dot2").classList.add("active-dot");
+            document.getElementById("line1").classList.add("active-line");
+          }
+          if (upperStatus.includes("DELIVERED")) {
+            document.getElementById("dot2").classList.add("active-dot");
+            document.getElementById("dot3").classList.add("active-dot");
+            document.getElementById("line1").classList.add("active-line");
+            document.getElementById("line2").classList.add("active-line");
+          }
+
+          // 2. NEW: Fetch and Display History Timeline
+          try {
+            const histRes = await fetch(`${API}/history/${id}`);
+            if (histRes.ok) {
+              const histData = await histRes.json();
+              const container = document.getElementById("historyContainer");
+              container.innerHTML = ""; // Clear old history
+
+              histData.history.forEach((item) => {
+                // Convert blockchain Unix timestamp to readable date
+                const date = new Date(item.timestamp * 1000).toLocaleString();
+
+                // Create the timeline UI element
+                const historyHtml = `
+                      <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                          <div class="flex items-center justify-center w-5 h-5 rounded-full border-4 border-slate-900 bg-blue-500 text-slate-900 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow flex-col absolute left-0 md:left-1/2 -translate-y-4 sm:translate-y-0 transform"></div>
+                          <div class="w-[calc(100%-2.5rem)] md:w-[calc(50%-1.25rem)] bg-slate-800/50 p-4 rounded-xl border border-slate-700 shadow">
+                              <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-1">
+                                  <span class="font-bold text-blue-400">${item.status}</span>
+                                  <span class="text-xs text-slate-500">${date}</span>
+                              </div>
+                              <div class="text-white text-sm font-medium mb-2">📍 ${item.location}</div>
+                              <div class="text-[10px] text-slate-500 font-mono truncate" title="${item.updater}">
+                                  Signed by: ${item.updater}
+                              </div>
+                          </div>
+                      </div>
+                    `;
+                container.innerHTML += historyHtml;
+              });
+            }
+          } catch (historyError) {
+            console.log("History could not be fetched", historyError);
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Shipment ID not found on Ledger.");
+        }
+      }
+
+      async function updateShipment() {
+        const id = document.getElementById("searchId").value;
+        const newStatus = document.getElementById("updateStatus").value;
+        const newLoc = document.getElementById("updateLoc").value;
+
+        if (!id) {
+          alert("Please search for a shipment ID first!");
+          return;
+        }
+
+        try {
+          const payload = {
+            shipmentId: id,
+            status: newStatus,
+            location: newLoc,
+          };
+
+          const res = await fetch(`${API}/update-status`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            alert("Blockchain Ledger Updated Successfully!");
+            track(); // Refresh the UI immediately to show the new status and move the blue dot!
+          } else {
+            const err = await res.json();
+            alert("Failed to update: " + (err.detail || "Check backend logs."));
+          }
+        } catch (e) {
+          console.error(e);
+          alert("Error communicating with Backend API.");
+        }
       }
     </script>
   </body>

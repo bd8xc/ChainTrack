@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
+address.txt
 .env
-venv/
 node_modules/
 .DS_Store
