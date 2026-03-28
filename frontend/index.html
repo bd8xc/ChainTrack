@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Blockchain Logistics</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        border-radius: 8px;
+        max-width: 400px;
+        margin-bottom: 20px;
+      }
+      input {
+        display: block;
+        margin-bottom: 10px;
+        width: 90%;
+        padding: 8px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📦 Shipment Tracker</h2>
+
+    <div class="card">
+      <h3>Create New Shipment</h3>
+      <input id="sId" placeholder="Shipment ID (e.g. SHP001)" />
+      <input id="pName" placeholder="Product Name" />
+      <button onclick="createShipment()">Register on Blockchain</button>
+    </div>
+
+    <div class="card">
+      <h3>Update Logistics Status</h3>
+      <input id="uId" placeholder="Shipment ID (e.g. SHP002)" />
+      <input id="uStatus" placeholder="New Status (e.g. IN_TRANSIT)" />
+      <input id="uLocation" placeholder="New Location (e.g. London Hub)" />
+      <button onclick="updateShipment()" style="background: #28a745">
+        Update Status
+      </button>
+    </div>
+
+    <div class="card">
+      <h3>Track Shipment</h3>
+      <input id="searchId" placeholder="Enter Shipment ID" />
+      <button onclick="track()">Track Now</button>
+      <div id="result"></div>
+      <div id="result"></div>
+      <div
+        id="qrContainer"
+        style="display: none; margin-top: 15px; text-align: center"
+      >
+        <p style="font-size: 14px; color: #555">Scan to Verify on Blockchain</p>
+        <img
+          id="qrImage"
+          src=""
+          style="
+            width: 150px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 8px;
+          "
+        />
+      </div>
+    </div>
+
+    <script>
+      async function createShipment() {
+        const data = {
+          shipmentId: document.getElementById("sId").value,
+          productName: document.getElementById("pName").value,
+          manufacturer: "Global Logistics",
+          weight: 5,
+          dimensions: "12x12x12",
+          material: "Cardboard",
+          origin: "NY",
+          destination: "LA",
+        };
+        const response = await fetch("http://127.0.0.1:8000/create-shipment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const res = await response.json();
+        alert("Success! Hash: " + res.tx_hash);
+      }
+
+      async function updateShipment() {
+        const data = {
+          shipmentId: document.getElementById("uId").value,
+          status: document.getElementById("uStatus").value,
+          location: document.getElementById("uLocation").value,
+        };
+
+        const response = await fetch("http://127.0.0.1:8000/update-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const res = await response.json();
+        alert("Status Updated! Hash: " + res.tx_hash);
+      }
+
+      async function track() {
+        const id = document.getElementById("searchId").value;
+        const response = await fetch(`http://127.0.0.1:8000/track/${id}`);
+        const data = await response.json();
+        document.getElementById("result").innerHTML =
+          `<p><strong>Status:</strong> ${data.status}</p><p><strong>Location:</strong> ${data.location}</p>`;
+
+        // --- ADD THESE TWO LINES ---
+        document.getElementById("qrImage").src =
+          `http://127.0.0.1:8000/qr/${id}`;
+        document.getElementById("qrContainer").style.display = "block";
+      }
+    </script>
+  </body>
+</html>
